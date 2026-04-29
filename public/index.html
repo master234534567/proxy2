@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ProxyWave</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #060810;
+      --surface: #0d1120;
+      --border: #1e2540;
+      --accent: #4f8eff;
+      --accent2: #a259ff;
+      --text: #e8eaf6;
+      --muted: #6b7498;
+      --glow: rgba(79, 142, 255, 0.18);
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow-x: hidden;
+    }
+
+    /* Animated background grid */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(79,142,255,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(79,142,255,0.04) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Glowing orb */
+    body::after {
+      content: '';
+      position: fixed;
+      top: -200px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 700px;
+      height: 700px;
+      background: radial-gradient(circle, rgba(79,142,255,0.12) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 680px;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2.5rem;
+    }
+
+    /* Logo */
+    .logo {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      animation: fadeDown 0.7s ease both;
+    }
+
+    .logo-icon {
+      width: 64px;
+      height: 64px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      box-shadow: 0 0 40px rgba(79,142,255,0.35);
+    }
+
+    .logo h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: 2.4rem;
+      font-weight: 800;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -1px;
+    }
+
+    .logo p {
+      color: var(--muted);
+      font-size: 0.95rem;
+      font-weight: 300;
+    }
+
+    /* Search box */
+    .search-card {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.4), 0 0 0 1px rgba(79,142,255,0.05);
+      animation: fadeUp 0.7s 0.1s ease both;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+    }
+
+    .search-input {
+      flex: 1;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 0.85rem 1.1rem;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .search-input::placeholder { color: var(--muted); }
+
+    .search-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--glow);
+    }
+
+    .go-btn {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 0.85rem 1.5rem;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+      box-shadow: 0 4px 20px rgba(79,142,255,0.3);
+      white-space: nowrap;
+    }
+
+    .go-btn:hover {
+      opacity: 0.92;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 28px rgba(79,142,255,0.45);
+    }
+
+    .go-btn:active { transform: translateY(0); }
+
+    /* Engine toggle */
+    .engine-row {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .engine-btn {
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      color: var(--muted);
+      padding: 0.4rem 0.9rem;
+      font-size: 0.82rem;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+
+    .engine-btn:hover { border-color: var(--accent); color: var(--text); }
+
+    .engine-btn.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(79,142,255,0.08);
+    }
+
+    /* Quick links */
+    .quick-links {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.75rem;
+      animation: fadeUp 0.7s 0.2s ease both;
+    }
+
+    .quick-link {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1rem 0.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      text-decoration: none;
+      color: var(--muted);
+      font-size: 0.8rem;
+      transition: all 0.2s;
+    }
+
+    .quick-link:hover {
+      border-color: var(--accent);
+      color: var(--text);
+      background: rgba(79,142,255,0.06);
+      transform: translateY(-2px);
+    }
+
+    .quick-link .ql-icon { font-size: 1.5rem; }
+
+    /* Status bar */
+    .status-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.82rem;
+      color: var(--muted);
+      animation: fadeUp 0.7s 0.3s ease both;
+    }
+
+    .status-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #2ecc71;
+      box-shadow: 0 0 8px #2ecc71;
+      animation: pulse 2s infinite;
+    }
+
+    /* Proxy iframe overlay */
+    #proxy-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      flex-direction: column;
+      background: var(--bg);
+    }
+
+    #proxy-overlay.active { display: flex; }
+
+    .proxy-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .proxy-url-input {
+      flex: 1;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 0.5rem 0.9rem;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      outline: none;
+    }
+
+    .proxy-url-input:focus { border-color: var(--accent); }
+
+    .proxy-btn {
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      color: var(--muted);
+      padding: 0.5rem 0.9rem;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .proxy-btn:hover { border-color: var(--accent); color: var(--text); }
+
+    #proxy-frame {
+      flex: 1;
+      border: none;
+      width: 100%;
+    }
+
+    /* Animations */
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    @media (max-width: 500px) {
+      .quick-links { grid-template-columns: repeat(2, 1fr); }
+      .logo h1 { font-size: 1.8rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="logo">
+    <div class="logo-icon">🌊</div>
+    <h1>ProxyWave</h1>
+    <p>Fast · Private · Unrestricted</p>
+  </div>
+
+  <div class="search-card">
+    <div class="input-row">
+      <input
+        class="search-input"
+        id="searchInput"
+        type="text"
+        placeholder="Search or enter a URL..."
+        autocomplete="off"
+        autocorrect="off"
+        spellcheck="false"
+      />
+      <button class="go-btn" onclick="navigate()">Go →</button>
+    </div>
+    <div class="engine-row" id="engineRow">
+      <button class="engine-btn active" onclick="setEngine(this,'https://www.google.com/search?q=')">Google</button>
+      <button class="engine-btn" onclick="setEngine(this,'https://search.yahoo.com/search?p=')">Yahoo</button>
+      <button class="engine-btn" onclick="setEngine(this,'https://www.bing.com/search?q=')">Bing</button>
+      <button class="engine-btn" onclick="setEngine(this,'https://duckduckgo.com/?q=')">DuckDuckGo</button>
+    </div>
+  </div>
+
+  <div class="quick-links">
+    <a class="quick-link" onclick="openProxy('https://www.youtube.com')">
+      <span class="ql-icon">▶️</span>YouTube
+    </a>
+    <a class="quick-link" onclick="openProxy('https://www.reddit.com')">
+      <span class="ql-icon">🤖</span>Reddit
+    </a>
+    <a class="quick-link" onclick="openProxy('https://www.twitch.tv')">
+      <span class="ql-icon">🎮</span>Twitch
+    </a>
+    <a class="quick-link" onclick="openProxy('https://discord.com/app')">
+      <span class="ql-icon">💬</span>Discord
+    </a>
+    <a class="quick-link" onclick="openProxy('https://www.instagram.com')">
+      <span class="ql-icon">📸</span>Instagram
+    </a>
+    <a class="quick-link" onclick="openProxy('https://twitter.com')">
+      <span class="ql-icon">🐦</span>Twitter
+    </a>
+    <a class="quick-link" onclick="openProxy('https://www.tiktok.com')">
+      <span class="ql-icon">🎵</span>TikTok
+    </a>
+    <a class="quick-link" onclick="openProxy('https://www.spotify.com')">
+      <span class="ql-icon">🎧</span>Spotify
+    </a>
+  </div>
+
+  <div class="status-bar">
+    <div class="status-dot"></div>
+    Proxy online &nbsp;·&nbsp; All traffic encrypted &nbsp;·&nbsp; No logs
+  </div>
+
+</div>
+
+<!-- Proxy overlay with address bar -->
+<div id="proxy-overlay">
+  <div class="proxy-bar">
+    <button class="proxy-btn" onclick="closeProxy()">✕ Close</button>
+    <button class="proxy-btn" id="backBtn" onclick="proxyBack()">← Back</button>
+    <input class="proxy-url-input" id="proxyUrlBar" type="text" placeholder="Enter URL..." onkeydown="if(event.key==='Enter')navigateProxy()"/>
+    <button class="proxy-btn" onclick="navigateProxy()">Go</button>
+    <button class="proxy-btn" onclick="reloadProxy()">↺</button>
+  </div>
+  <iframe id="proxy-frame" src="" sandbox="allow-forms allow-modals allow-pointer-lock allow-popups allow-presentation allow-same-origin allow-scripts"></iframe>
+</div>
+
+<script>
+  // ─── Config ───────────────────────────────────────────────────────────────
+  // Replace this with your deployed Ultraviolet / bare-server URL
+  // e.g. "https://your-app.up.railway.app/bare/"
+  const BARE_SERVER = "/bare/";
+
+  // Ultraviolet encodes URLs like this (update if you use a different proxy):
+  function encodeProxyUrl(url) {
+    // Simple passthrough — replace with UV's __uv$config.encodeUrl if using UV
+    return "/service/" + btoa(url);
+  }
+
+  let searchEngine = "https://www.google.com/search?q=";
+
+  function setEngine(btn, engine) {
+    document.querySelectorAll('.engine-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    searchEngine = engine;
+  }
+
+  function navigate() {
+    const val = document.getElementById('searchInput').value.trim();
+    if (!val) return;
+    let url;
+    if (/^https?:\/\//i.test(val)) {
+      url = val;
+    } else if (/^[\w-]+\.\w{2,}/.test(val) && !val.includes(' ')) {
+      url = 'https://' + val;
+    } else {
+      url = searchEngine + encodeURIComponent(val);
+    }
+    openProxy(url);
+  }
+
+  function openProxy(url) {
+    document.getElementById('proxyUrlBar').value = url;
+    // ── If you have UV set up, swap the line below with:
+    // document.getElementById('proxy-frame').src = __uv$config.prefix + __uv$config.encodeUrl(url);
+    document.getElementById('proxy-frame').src = url;
+    document.getElementById('proxy-overlay').classList.add('active');
+  }
+
+  function closeProxy() {
+    document.getElementById('proxy-overlay').classList.remove('active');
+    document.getElementById('proxy-frame').src = '';
+  }
+
+  function navigateProxy() {
+    let val = document.getElementById('proxyUrlBar').value.trim();
+    if (!val) return;
+    if (!/^https?:\/\//i.test(val)) val = 'https://' + val;
+    openProxy(val);
+  }
+
+  function reloadProxy() {
+    const f = document.getElementById('proxy-frame');
+    f.src = f.src;
+  }
+
+  function proxyBack() {
+    document.getElementById('proxy-frame').contentWindow?.history.back();
+  }
+
+  // Enter key on main search
+  document.getElementById('searchInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') navigate();
+  });
+</script>
+
+</body>
+</html>
